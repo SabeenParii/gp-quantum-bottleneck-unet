@@ -1,0 +1,14 @@
+{
+  "title": "gp-quantum-bottleneck-unet: Source code for global versus patch-wise quantum bottlenecks in U-Net mammographic mass segmentation",
+  "upload_type": "software",
+  "description": "Code, fold assignments and external-test crop list for the study of global versus patch-wise quantum bottlenecks in U-Net mass segmentation on CBIS-DDSM, with size-matched classical and identity controls, severing tests and external testing on DMID.",
+  "creators": [
+    {
+      "name": "Parii, Sabeen",
+      "affiliation": "Wuhan University of Technology",
+      "orcid": "0000-0002-2272-6115"
+    }
+  ],
+  "keywords": ["hybrid quantum-classical neural networks", "U-Net", "mammography", "medical image segmentation", "ablation study", "external validation"],
+  "license": "MIT"
+}
