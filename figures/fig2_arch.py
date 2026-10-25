@@ -1,3 +1,5 @@
+import os
+OUTDIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'out'); os.makedirs(OUTDIR, exist_ok=True)
 """Fig. 2: hybrid U-Net with a bottleneck slot; global vs patch-wise placement; block types; severing layer."""
 import matplotlib as mpl, matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, Rectangle, Circle
@@ -54,7 +56,7 @@ arrow(25, yb + bh / 2, 29.5, yb + bh / 2)
 arrow(40, yb + bh / 2, 44.2, yb + bh / 2)
 box(44.2, yb, 9.5, bh, '16²×512', ENC, fs=6.6)
 arrow(48.95, yb + bh, xs_dec - 3 * 2.2 + bw / 2, ytop - 3 * 9.2)
-ax.text(4, ytop + bh + 1.0, 'input 256×256 crop', fontsize=6.5, color='#555555')
+ax.text(4, ytop + bh + 1.0, 'input 256×256 crop (randomized)', fontsize=6.5, color='#555555')
 ax.text(46, ytop + bh + 1.0, 'mask (sigmoid)', fontsize=6.5, color='#555555')
 ax.text(29, 38.5, 'unet: classical U-Net (31M)   full: no compression in the slot', fontsize=6.3, color='#555555', ha='center')
 
@@ -74,7 +76,7 @@ row(70, [('16²×512', ENC, 8.5, {}),
          ('global avg\npool → 512', SLOT, 10.5, {}),
          ('Dense(4)\ntanh', SLOT, 8.0, {}),
          ('BLOCK\n1 code', '#ffffff', 8.6, dict(lw=1.2, ec='#9b1c1c')),
-         ('sever', SEV, 6.5, dict(ls=(0, (2, 1.5)))),
+         ('replace\ncode', SEV, 7.5, dict(ls=(0, (2, 1.5)))),
          ('Dense(512)\nReLU', SLOT, 10.5, {}),
          ('tile\n→ 16²×512', SLOT, 10.5, {})],
     'Slot contents, global placement: one 4-d code per image', '(b)')
@@ -82,7 +84,7 @@ row(47, [('16²×512', ENC, 8.5, {}),
          ('avg pool 4×4\n→ 4²×512', SLOT, 10.5, {}),
          ('1×1 conv\n(4), tanh', SLOT, 9.0, {}),
          ('BLOCK\n16 codes', '#ffffff', 8.6, dict(lw=1.2, ec='#9b1c1c')),
-         ('sever', SEV, 6.5, dict(ls=(0, (2, 1.5)))),
+         ('replace\ncode', SEV, 7.5, dict(ls=(0, (2, 1.5)))),
          ('1×1 conv\n(512), ReLU', SLOT, 10.5, {}),
          ('upsample 4×\n→ 16²×512', SLOT, 10.5, {})],
     'Slot contents, patch-wise placement: one 4-d code per 64×64-px region', '(c)')
@@ -123,13 +125,13 @@ layer(cx0 + 40, 'layer 2')
 # classical and identity
 box(74, 17, 30, 13, 'Cl: Dense(4), tanh\n20 weights\n(same count as the circuit)', CL, fs=6.8)
 box(74, 1.5, 30, 12.5, 'Id: identity\nno weights\n(is a trainable map needed?)', ID, fs=6.8)
-# severing explanation
+# code-replacement explanation
 box(108, 1.5, 33.5, 28.5, '', SEV, ls=(0, (2, 1.5)))
-ax.text(124.75, 27.5, 'sever (test time only)', ha='center', va='top', fontsize=7.2, fontweight='bold')
-ax.text(110, 22.5, 'Inactive during training.\nAt test time it can replace\nthe BLOCK output with:\n\n• const: mean training code\n• swap: code of a random\n   training image\n\nDice drop = how much the\ndecoder uses the code.',
+ax.text(124.75, 27.5, 'replace code (test time only)', ha='center', va='top', fontsize=7.2, fontweight='bold')
+ax.text(110, 22.5, 'Inactive during training.\nAt test time it can replace\nthe BLOCK output with:\n\n• const: mean training code\n• swap: code of a random\n   training image\n\nDice drop = sensitivity of\nthe output to the code.',
         fontsize=6.4, va='top', linespacing=1.2)
 
 for ext in ('pdf', 'svg'):
-    fig.savefig(f'out/fig2_architecture.{ext}')
-fig.savefig('out/fig2_architecture.png', dpi=600)
+    fig.savefig(f'{OUTDIR}/fig2_architecture.{ext}')
+fig.savefig(OUTDIR + '/fig2_architecture.png', dpi=600)
 print('ok')

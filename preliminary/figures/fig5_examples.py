@@ -18,10 +18,10 @@ RUNS_DIR = f'{PROJECT}/results/p2_cbis_runs_e200'           # main runs, read on
 DEDUP    = f'{PROJECT}/results/p2_analysis_v2/dmid_dedup.csv'
 OUT_DIR  = f'{PROJECT}/results/figures'
 CODE_DIR = f'{PROJECT}/code'
-QSEG_DIR = '/content/drive/MyDrive/QSEG_FINAL/code'      # Paper 1 package, read only
+QSEG_DIR = '/content/drive/MyDrive/quantum-placement/code'      # folder that contains the qseg/ package
 if not os.path.exists(f'{QSEG_DIR}/qseg/quantum_sim.py'):
     hits = glob.glob('/content/drive/MyDrive/**/qseg/quantum_sim.py', recursive=True)
-    assert hits, 'Paper 1 qseg package not found on Drive'
+    assert hits, 'qseg package not found on Drive'
     QSEG_DIR = os.path.dirname(os.path.dirname(hits[0]))
 for p in (QSEG_DIR, CODE_DIR):
     if p not in sys.path: sys.path.insert(0, p)

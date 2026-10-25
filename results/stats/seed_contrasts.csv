@@ -1,0 +1,25 @@
+schedule,dataset,contrast,seed,mean_diff
+train,CBIS,g_q - g_cl,0,-0.0314625
+train,CBIS,g_q - g_cl,1,-0.0402025
+train,CBIS,g_q - g_cl,2,0.008451750000000003
+train,CBIS,p_q - p_cl,0,0.0036774999999999967
+train,CBIS,p_q - p_cl,1,0.002455750000000001
+train,CBIS,p_q - p_cl,2,-0.007917999999999996
+train,DMID,g_q - g_cl,0,-0.02704418604651163
+train,DMID,g_q - g_cl,1,-0.005023189368770764
+train,DMID,g_q - g_cl,2,0.025587176079734215
+train,DMID,p_q - p_cl,0,-0.021243588039867114
+train,DMID,p_q - p_cl,1,-0.007622059800664451
+train,DMID,p_q - p_cl,2,0.0011522259136212622
+val,CBIS,g_q - g_cl,0,0.013916249999999995
+val,CBIS,g_q - g_cl,1,-0.007905000000000004
+val,CBIS,g_q - g_cl,2,0.045061500000000004
+val,CBIS,p_q - p_cl,0,-0.030294749999999995
+val,CBIS,p_q - p_cl,1,-0.020763249999999997
+val,CBIS,p_q - p_cl,2,-0.015574249999999998
+val,DMID,g_q - g_cl,0,-0.008287774086378734
+val,DMID,g_q - g_cl,1,-0.06814770764119601
+val,DMID,g_q - g_cl,2,0.041353023255813956
+val,DMID,p_q - p_cl,0,-0.004758870431893692
+val,DMID,p_q - p_cl,1,-0.03124093023255814
+val,DMID,p_q - p_cl,2,-0.0342512292358804

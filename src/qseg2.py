@@ -1,11 +1,11 @@
-"""Paper 2: placement of the quantum bottleneck (global vs patch-wise) and bottleneck use.
+"""Placement of the quantum bottleneck (global vs patch-wise) and bottleneck use.
 
-Builds on the Paper 1 package `qseg` (same conv blocks, circuit, simulator, loss, metrics,
+Builds on the package `qseg` (same conv blocks, circuit, simulator, loss, metrics,
 augmentation and training settings). New here:
 
 * Global (G) and patch-wise (P) bottlenecks with the same 4->4 block slot, each with
   circuit (Q), equal-parameter classical layer (Cl) or identity (Id). Neither uses the
-  67M-parameter dense expansion of Paper 1:
+  67M-parameter dense expansion of the base hybrid U-Net:
       G: 16x16x512 -> GAP -> Dense(4, tanh) -> block -> Dense(512, relu) -> tile 16x16
       P: 16x16x512 -> AvgPool(4) -> Conv1x1(4, tanh) -> block per cell (16 cells)
                    -> Conv1x1(512, relu) -> nearest up-sampling x4
@@ -33,7 +33,7 @@ from qseg.models import TFCircuitLayer, build_unet, conv_block, output_layer, pa
 from qseg.train import bce_dice_loss, soft_dice
 
 MODELS2 = {
-    "unet": "C-UNet (Paper 1 baseline)",
+    "unet": "C-UNet (classical baseline)",
     "full": "Hybrid U-Net, uncompressed bottleneck",
     "g_q": "Global bottleneck, circuit",
     "g_cl": "Global bottleneck, classical Dense(4)",
@@ -46,8 +46,8 @@ MODELS2 = {
 
 # ----------------------------------------------------------------------------- layers
 class PatchCircuitLayer(TFCircuitLayer):
-    """The Paper 1 circuit applied independently to every cell of a (B, h, w, 4) map.
-    One shared set of 24 weights (20 effective), exactly as in Paper 1."""
+    """The 4-qubit circuit applied independently to every cell of a (B, h, w, 4) map.
+    One shared set of 24 weights (20 effective), as in the global placement."""
 
     def call(self, inputs):
         x = tf.cast(inputs, tf.float32)
