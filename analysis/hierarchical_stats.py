@@ -17,7 +17,8 @@ df = df[df.keep == True].copy()
 df['cluster'] = np.where(df.dataset == 'CBIS', df.roi_id.str.extract(r'(P_\d{5})')[0], df.roi_id.str.split('_').str[0])
 SW = [f'dice_swap{k}' for k in range(10)]
 df['dice_swapavg'] = df[SW].mean(1)
-FAILED = ('g_id', 0, 1)   # train schedule, fold 0, seed 1: CBIS Dice 0.099 (collapsed run)
+# The collapsed run (primary schedule, global identity, fold 0, seed 1; CBIS Dice 0.099) is kept here.
+# Its sensitivity analysis (removed from BOTH models of every contrast) is in additional_analyses.py.
 
 
 def unit_table(t, col='dice'):
@@ -61,43 +62,38 @@ CONTRASTS = [('p_q', 'g_q'), ('p_cl', 'g_cl'), ('p_id', 'g_id'),                
              ('g_q', 'g_cl'), ('g_q', 'g_id'), ('g_cl', 'g_id'),                    # block, global
              ('p_q', 'p_cl'), ('p_q', 'p_id'), ('p_cl', 'p_id')]                    # block, patch-wise
 rows, summ = [], []
-for excl in (False, True):
-    for sched in ('train', 'val'):
-        for ds in ('CBIS', 'DMID'):
-            t = df[(df.set == sched) & (df.dataset == ds)]
-            if excl:
-                t = t[~((t.model == FAILED[0]) & (t.fold == FAILED[1]) & (t.seed == FAILED[2]) & (sched == 'train'))]
-                if sched != 'train': continue
-            rng = np.random.default_rng(0)
-            res = []
-            for a, b in CONTRASTS:
-                e, lo, hi, p, bs = contrast(t, a, b, rng=rng)
-                res.append(dict(excl_failed=excl, schedule=sched, dataset=ds, contrast=f'{a} - {b}', diff=e, ci_low=lo, ci_high=hi, p=p,
-                                bound90=max(abs(np.percentile(bs, 5)), abs(np.percentile(bs, 95)))))
-            # interaction: placement effect of circuit vs Dense(4): (p_q - g_q) - (p_cl - g_cl)
-            x = unit_table(t[t.model == 'p_q']).merge(unit_table(t[t.model == 'g_q']), on=['roi_id', 'cluster', 'seed'], suffixes=('_pq', '_gq'))
-            y = unit_table(t[t.model == 'p_cl']).merge(unit_table(t[t.model == 'g_cl']), on=['roi_id', 'cluster', 'seed'], suffixes=('_pc', '_gc'))
-            m = x.merge(y, on=['roi_id', 'cluster', 'seed']); m['v'] = (m.dice_pq - m.dice_gq) - (m.dice_pc - m.dice_gc)
-            e, lo, hi, p, _ = boot_stat(m[['roi_id', 'cluster', 'seed', 'v']], rng)
-            res.append(dict(excl_failed=excl, schedule=sched, dataset=ds, contrast='(p_q - g_q) - (p_cl - g_cl)', diff=e, ci_low=lo, ci_high=hi, p=p))
-            r = pd.DataFrame(res); fam = ~r.contrast.str.startswith('(')
-            r['p_holm'] = np.nan; r.loc[fam, 'p_holm'] = holm(r.loc[fam, 'p'].values); rows.append(r)
-            if not excl:
-                for mdl in sorted(t.model.unique()):
-                    tt = t[t.model == mdl]
-                    u = unit_table(tt).rename(columns={'dice': 'v'})
-                    e, lo, hi, _, _ = boot_stat(u, np.random.default_rng(0))
-                    d = dict(schedule=sched, dataset=ds, model=mdl, n_runs=tt[['fold', 'seed']].drop_duplicates().shape[0],
-                             dice=e, ci_low=lo, ci_high=hi, iou=tt.iou.mean(), hd95_median=tt.hd95.median())
-                    if tt.dice_const.notna().any():
-                        for col, nm in (('dice_const', 'const'), ('dice_swap0', 'swap0'), ('dice_swapavg', 'swapavg')):
-                            tt2 = tt.assign(drop=tt.dice - tt[col])
-                            u = unit_table(tt2, 'drop').rename(columns={'drop': 'v'})
-                            e2, lo2, hi2, _, _ = boot_stat(u, np.random.default_rng(0))
-                            d.update({f'drop_{nm}': e2, f'drop_{nm}_lo': lo2, f'drop_{nm}_hi': hi2})
-                        d['swap_draw_sd'] = tt.groupby(['fold', 'seed'])[SW].mean().std(axis=1).mean()   # Monte Carlo spread over 10 swap draws
-                        d['flip_const'] = tt.flip_const.mean(); d['flip_swap'] = tt.flip_swap.mean()
-                    summ.append(d)
+for sched in ('train', 'val'):
+    for ds in ('CBIS', 'DMID'):
+        t = df[(df.set == sched) & (df.dataset == ds)]
+        rng = np.random.default_rng(0)
+        res = []
+        for a, b in CONTRASTS:
+            e, lo, hi, p, bs = contrast(t, a, b, rng=rng)
+            res.append(dict(schedule=sched, dataset=ds, contrast=f'{a} - {b}', diff=e, ci_low=lo, ci_high=hi, p=p,
+                            bound90=max(abs(np.percentile(bs, 5)), abs(np.percentile(bs, 95)))))
+        # interaction: placement effect of circuit vs Dense(4): (p_q - g_q) - (p_cl - g_cl)
+        x = unit_table(t[t.model == 'p_q']).merge(unit_table(t[t.model == 'g_q']), on=['roi_id', 'cluster', 'seed'], suffixes=('_pq', '_gq'))
+        y = unit_table(t[t.model == 'p_cl']).merge(unit_table(t[t.model == 'g_cl']), on=['roi_id', 'cluster', 'seed'], suffixes=('_pc', '_gc'))
+        m = x.merge(y, on=['roi_id', 'cluster', 'seed']); m['v'] = (m.dice_pq - m.dice_gq) - (m.dice_pc - m.dice_gc)
+        e, lo, hi, p, _ = boot_stat(m[['roi_id', 'cluster', 'seed', 'v']], rng)
+        res.append(dict(schedule=sched, dataset=ds, contrast='(p_q - g_q) - (p_cl - g_cl)', diff=e, ci_low=lo, ci_high=hi, p=p))
+        r = pd.DataFrame(res); fam = ~r.contrast.str.startswith('(')
+        r['p_holm'] = np.nan; r.loc[fam, 'p_holm'] = holm(r.loc[fam, 'p'].values); rows.append(r)
+        for mdl in sorted(t.model.unique()):
+            tt = t[t.model == mdl]
+            u = unit_table(tt).rename(columns={'dice': 'v'})
+            e, lo, hi, _, _ = boot_stat(u, np.random.default_rng(0))
+            d = dict(schedule=sched, dataset=ds, model=mdl, n_runs=tt[['fold', 'seed']].drop_duplicates().shape[0],
+                     dice=e, ci_low=lo, ci_high=hi, iou=tt.iou.mean(), hd95_median=tt.hd95.median())
+            if tt.dice_const.notna().any():
+                for col, nm in (('dice_const', 'const'), ('dice_swap0', 'swap0'), ('dice_swapavg', 'swapavg')):
+                    tt2 = tt.assign(drop=tt.dice - tt[col])
+                    u = unit_table(tt2, 'drop').rename(columns={'drop': 'v'})
+                    e2, lo2, hi2, _, _ = boot_stat(u, np.random.default_rng(0))
+                    d.update({f'drop_{nm}': e2, f'drop_{nm}_lo': lo2, f'drop_{nm}_hi': hi2})
+                d['swap_draw_sd'] = tt.groupby(['fold', 'seed'])[SW].mean().std(axis=1).mean()   # spread over the 10 swap draws (fixed permutations of one bank)
+                d['flip_const'] = tt.flip_const.mean(); d['flip_swap'] = tt.flip_swap.mean()
+            summ.append(d)
 con = pd.concat(rows, ignore_index=True); con.to_csv(f'{OUT}/contrasts.csv', index=False)
 sm = pd.DataFrame(summ); sm.to_csv(f'{OUT}/summary_models.csv', index=False)
 
@@ -120,7 +116,7 @@ pd.set_option('display.width', 250); pd.set_option('display.max_rows', 300)
 print(con.round(4).to_string()); print(ref.round(4).to_string())
 print(run.groupby(['set', 'model'])[['dice', 'epochs', 'best']].agg(['mean', 'min', 'max']).round(3).to_string())
 
-# ---- per-run paired contrasts (one value per fold x seed; CBIS only; descriptive, M2)
+# ---- per-run paired contrasts (one value per fold x seed; CBIS only; descriptive)
 pr = []
 for sched in ('train', 'val'):
     t = df[(df.set == sched) & (df.dataset == 'CBIS')].groupby(['model', 'fold', 'seed']).dice.mean().unstack('model')

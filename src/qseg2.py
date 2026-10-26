@@ -62,7 +62,13 @@ class PatchCircuitLayer(TFCircuitLayer):
 
 class Sever(layers.Layer):
     """Identity during training. At test time `mode` = 1 replaces every code by the mean
-    training code, `mode` = 2 by the code of a random training image (from `bank`)."""
+    training code, `mode` = 2 by the code of a random training image (from `bank`).
+
+    Swap draws: the bank index of each image comes from a stateless generator whose seed combines a
+    fixed constant with the sum of the absolute codes of the current batch. Donors therefore depend on
+    the batch composition (batch size and image order were fixed in all evaluations); an image's own
+    code enters the seed only through the batch sum, and donors are not selected for similarity. Ten draws were obtained by permuting the stored bank with ten
+    fixed permutations (notebooks 14 and 20)."""
 
     def __init__(self, bank_size=256, **kwargs):
         super().__init__(**kwargs)

@@ -79,7 +79,7 @@ row(70, [('16²×512', ENC, 8.5, {}),
          ('replace\ncode', SEV, 7.5, dict(ls=(0, (2, 1.5)))),
          ('Dense(512)\nReLU', SLOT, 10.5, {}),
          ('tile\n→ 16²×512', SLOT, 10.5, {})],
-    'Slot contents, global placement: one 4-d code per image', '(b)')
+    'Global slot: one 4-d code per image', '(b)')
 row(47, [('16²×512', ENC, 8.5, {}),
          ('avg pool 4×4\n→ 4²×512', SLOT, 10.5, {}),
          ('1×1 conv\n(4), tanh', SLOT, 9.0, {}),
@@ -87,7 +87,7 @@ row(47, [('16²×512', ENC, 8.5, {}),
          ('replace\ncode', SEV, 7.5, dict(ls=(0, (2, 1.5)))),
          ('1×1 conv\n(512), ReLU', SLOT, 10.5, {}),
          ('upsample 4×\n→ 16²×512', SLOT, 10.5, {})],
-    'Slot contents, patch-wise placement: one 4-d code per 64×64-px region', '(c)')
+    'Patch-wise slot: one 4-d code per pooled cell (nominal 64×64 px)', '(c)')
 ax.text(103.5, 44.2, 'Both placements: 7,856,581–7,856,605 trainable parameters', fontsize=6.3, color='#555555', ha='center')
 
 # ---------------- (d) block types ----------------

@@ -14,7 +14,7 @@ MK = {'q': 'o', 'cl': 's', 'id': '^', 'ref': 'D'}
 LAB = {'q': 'Circuit', 'cl': 'Dense(4)', 'id': 'Identity'}
 GRID = '#e3e3e3'
 sm = pd.read_csv(f'{ST}/summary_models.csv')
-con = pd.read_csv(f'{ST}/contrasts.csv'); con = con[~con.excl_failed]
+con = pd.read_csv(f'{ST}/contrasts.csv')
 df = pd.read_csv(os.path.join(ROOT, 'results', 'per_image_results.csv.gz')); df = df[df.keep == True]
 base = pd.read_csv(os.path.join(ROOT, 'results', 'no_network_baselines.csv'))
 SCHED = {'train': 'LR schedule on training loss (primary)', 'val': 'LR schedule on validation loss'}
