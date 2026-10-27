@@ -1,6 +1,6 @@
 {
   "title": "gp-quantum-bottleneck-unet: Source code for global versus patch-wise quantum bottlenecks in U-Net mammographic mass segmentation",
-  "version": "v2.0.1",
+  "version": "v2.0.2",
   "upload_type": "software",
   "description": "Code, data tables and per-image results for the study 'Simulated Quantum Bottlenecks in U-Net Mammographic Mass Segmentation: No Resolved Dice Benefit and Training-Dependent Encoding Effects'. A simulated 4-qubit circuit is placed globally or patch-wise in a U-Net bottleneck and compared with a same-size classical Dense(4) layer and an identity mapping in the same slot. Models are trained on randomized CBIS-DDSM mass ROI crops (patient-level five-fold cross-validation, three seeds, two learning-rate schedules, 190 runs) and tested without fine-tuning on DMID. The release contains the preprocessing, training, evaluation, code-replacement and statistics code, the patient-level folds and crop parameters, the DMID reference assignment records, and the per-image results of all runs. No images are included.",
   "creators": [

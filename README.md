@@ -36,6 +36,7 @@ Only public, de-identified datasets are used. **No images are included in this r
 | `results/no_network_baselines*.csv` | Mean-mask and centered-disc baselines without a network (main cohort, original rule, without uncertain records) |
 | `results/run_records.csv` | One row per run: epochs, best epoch, training time, GPU, learning-rate history summary, gradient audit of the circuit weights |
 | `results/train_val_soft_dice.csv` | Train and validation soft Dice of every run, both measured in inference mode |
+| `results/finite_shots_per_image.csv.gz` | Finite-shot evaluation of the 60 circuit runs (notebook 23): per-image Dice with exact expectation values and with 100, 1,000 and 10,000 shots (three draws each), share of flipped pixels and mean absolute probability change |
 | `results/stats/` | Output of the analysis scripts (contrasts, Holm-adjusted p-values, code-replacement tests, sensitivity analyses) |
 
 Column codes: `set` / `schedule` = learning-rate schedule (`train`: reduce on training loss, primary; `val`: reduce on validation loss); `model` = `g_q`, `g_cl`, `g_id`, `p_q`, `p_cl`, `p_id` (placement_block), `full`, `unet`; `dataset` = `CBIS` or `DMID`.
@@ -71,6 +72,7 @@ preliminary/       earlier pipeline with mask-centered crops (preliminary analys
 | `20_dmid_corrected_rescore` | Corrected DMID reference assignment and re-scoring of all saved models (no retraining) | T4 GPU |
 | `21_dmid_corrected_baselines` | No-network baselines on the corrected DMID cohort | CPU |
 | `22_full_precision_export` | Re-exports the per-image results of notebooks 14 and 20 without rounding (the compact exports of notebooks 16 and 20 round to four decimals; they are not used for the statistics) | CPU |
+| `23_finite_shot_evaluation` | Re-evaluates the 60 trained circuit models with finite-shot estimates of the circuit outputs (binomial sampling, 100 / 1,000 / 10,000 shots, three draws; no retraining) | T4 GPU |
 
 **Statistics (any computer, from the repository root).**
 
@@ -79,6 +81,7 @@ python analysis/hierarchical_stats.py                       # main contrasts, mo
 python analysis/additional_analyses.py                      # interaction, between-setting changes, collapsed run, seeds
 python analysis/fold0_sensitivity.py                        # all contrasts without fold 0, both schedules
 python analysis/severing_tests.py                           # code-replacement tests with Holm correction
+python analysis/finite_shots.py                             # finite-shot evaluation of the circuit models
 python analysis/hierarchical_stats.py --exclude-uncertain --out results/stats_excl_uncertain
 python analysis/hierarchical_stats.py --results results/per_image_results_original_rule.csv.gz --out results/stats_original_rule
 python figures/figs_results.py                              # Figs. 4-6 (Fig. 3 needs the crop QC grid from notebook 11)
@@ -105,7 +108,12 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 | Suppl. Table S3 (without fold 0) | `fold0_sensitivity.py` | `stats/fold0_excluded_both_schedules.csv` |
 | Suppl. Table S4 (exact p-values) | `hierarchical_stats.py`, `severing_tests.py` | `stats/contrasts.csv`, `stats/severing_tests.csv` |
 | Suppl. Table S5 (seed-specific and per-run) | `additional_analyses.py`, `hierarchical_stats.py` | `stats/seed_contrasts.csv`, `stats/per_run_contrasts.csv` |
+| Section IV-G; Suppl. Table S8 (finite shots) | `finite_shots.py` | `stats/finite_shots_drop.csv`, `stats/finite_shots_contrasts.csv`, `stats/finite_shots_exact_check.csv` |
 | Suppl. Table S7 (changes between settings) | `additional_analyses.py` | `stats/additional_analyses.csv` (`schedule change …`, `dataset change …`) |
+
+## Changes in v2.0.2
+
+- Finite-shot evaluation of the trained circuit models (notebook 23, `analysis/finite_shots.py`, `results/finite_shots_per_image.csv.gz`). The circuit outputs are replaced by binomial N-shot estimates (N = 100, 1,000, 10,000; qubits sampled independently; no hardware noise; no retraining). The exact predictions are recomputed in the same notebook; they agree with the stored per-image Dice to within 0.006 (floating-point differences between evaluation sessions).
 
 ## Changes in v2.0.1
 
@@ -115,7 +123,7 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 
 ## Environment
 
-The reported runs used TensorFlow 2.21.0 on NVIDIA T4 or L4 GPUs in Google Colab. The quantum circuit is simulated exactly as a state vector inside TensorFlow. See `requirements.txt` for the other packages.
+The reported runs used TensorFlow 2.21.0 on NVIDIA T4 or L4 GPUs in Google Colab. The quantum circuit is simulated exactly as a state vector inside TensorFlow; notebook 23 adds a finite-shot readout at test time only. See `requirements.txt` for the other packages.
 
 ## License
 
