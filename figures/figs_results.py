@@ -91,22 +91,24 @@ ys = [len(ROWS) - 1 - y - (0.4 if y >= 3 else 0) - (0.4 if y >= 6 else 0) for y 
 axs[0].set_yticks(ys); axs[0].set_yticklabels([r[1] for r in ROWS], fontsize=6.8)
 fig.tight_layout(w_pad=0.6); fig.savefig(f'{O}/fig5_contrasts.png', dpi=400); fig.savefig(f'{O}/fig5_contrasts.pdf'); plt.close(fig)
 
-# ---------------- Fig. 6: severing drops
+# ---------------- Fig. 6: code-replacement drops (revised protocol: 240-image bank, activation-independent donors)
+rt = pd.read_csv(f'{ST}/replacement_v2_tests.csv')
 MODS = [('g_q', 'q'), ('g_cl', 'cl'), ('g_id', 'id'), ('p_q', 'q'), ('p_cl', 'cl'), ('p_id', 'id')]
-fig, axs = plt.subplots(1, 4, figsize=(7.16, 2.5), sharey=True)
+fig, axs = plt.subplots(1, 4, figsize=(7.16, 2.6), sharey=True)
 for a, (sched, ds) in zip(axs, (('train', 'CBIS'), ('train', 'DMID'), ('val', 'CBIS'), ('val', 'DMID'))):
     for k, (m, b) in enumerate(MODS):
-        r = sm[(sm.schedule == sched) & (sm.dataset == ds) & (sm.model == m)].iloc[0]
         x = k + (0.5 if k >= 3 else 0)
-        for dx, col, mfc in ((-0.16, 'drop_const', 'white'), (0.16, 'drop_swapavg', COL[b])):
-            a.errorbar(x + dx, r[col], yerr=[[r[col] - r[col + '_lo']], [r[col + '_hi'] - r[col]]], fmt=MK[b], ms=4, color=COL[b],
+        for dx, test, mfc in ((-0.16, 'const', 'white'), (0.16, 'swap', COL[b])):
+            r = rt[(rt.schedule == sched) & (rt.dataset == ds) & (rt.model == m) & (rt.test == test)].iloc[0]
+            a.errorbar(x + dx, r['drop'], yerr=[[r['drop'] - r.ci_low], [r.ci_high - r['drop']]], fmt=MK[b], ms=4.5, color=COL[b],
                        mfc=mfc, mew=0.9, elinewidth=1.0, capsize=1.5)
     a.axhline(0, color='#555555', lw=0.7); a.grid(axis='y', color=GRID, lw=0.5); a.set_axisbelow(True)
-    a.set_xticks([k + (0.5 if k >= 3 else 0) for k in range(6)]); a.set_xticklabels(['G-Q', 'G-Cl', 'G-Id', 'P-Q', 'P-Cl', 'P-Id'], fontsize=6.3, rotation=0)
-    a.set_title(f"{'CBIS-DDSM' if ds == 'CBIS' else 'DMID'}\n{'training-loss LR (primary)' if sched == 'train' else 'validation-loss LR'}", fontsize=7)
-axs[0].set_ylabel('Dice drop when the code is replaced', fontsize=7); axs[0].set_ylim(-0.06, 0.45)
-h = [plt.Line2D([], [], marker='o', color='#444444', ls='', ms=4, mfc='white', label='const (mean training code)'),
-     plt.Line2D([], [], marker='o', color='#444444', ls='', ms=4, label='swap (another image’s code, mean of 10 draws)')]
-fig.legend(handles=h, loc='upper center', ncol=2, frameon=False, fontsize=7, bbox_to_anchor=(0.5, 1.0))
-fig.tight_layout(rect=(0, 0, 1, 0.92), w_pad=0.6); fig.savefig(f'{O}/fig6_severing.png', dpi=400); fig.savefig(f'{O}/fig6_severing.pdf'); plt.close(fig)
+    a.set_xticks([k + (0.5 if k >= 3 else 0) for k in range(6)]); a.set_xticklabels(['G-Q', 'G-Cl', 'G-Id', 'P-Q', 'P-Cl', 'P-Id'], fontsize=7, rotation=0)
+    a.tick_params(axis='y', labelsize=7)
+    a.set_title(f"{'CBIS-DDSM' if ds == 'CBIS' else 'DMID'}\n{'training-loss LR (primary)' if sched == 'train' else 'validation-loss LR'}", fontsize=7.5)
+axs[0].set_ylabel('Dice drop when the code is replaced', fontsize=7.5); axs[0].set_ylim(-0.06, 0.45)
+h = [plt.Line2D([], [], marker='o', color='#444444', ls='', ms=4.5, mfc='white', label='const (mean of the 240 training codes)'),
+     plt.Line2D([], [], marker='o', color='#444444', ls='', ms=4.5, label='swap (another training image’s code, mean of 10 draws)')]
+fig.legend(handles=h, loc='upper center', ncol=2, frameon=False, fontsize=7.5, bbox_to_anchor=(0.5, 1.0))
+fig.tight_layout(rect=(0, 0, 1, 0.91), w_pad=0.6); fig.savefig(f'{O}/fig6_severing.png', dpi=400); fig.savefig(f'{O}/fig6_severing.pdf'); plt.close(fig)
 print('ok')

@@ -6,8 +6,8 @@ authors:
     given-names: Sabeen
     affiliation: Wuhan University of Technology
     orcid: "https://orcid.org/0000-0002-2272-6115"
-version: 2.0.2
-date-released: 2026-10-28
+version: 2.1.0
+date-released: 2026-10-29
 license: MIT
 repository-code: "https://github.com/SabeenParii/gp-quantum-bottleneck-unet"
 doi: 10.5281/zenodo.23509729
