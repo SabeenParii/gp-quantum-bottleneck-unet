@@ -1,0 +1,49 @@
+Paper 2 - revision 5 (extension to five seeds and two further external test sets), written before any revision-5 run was trained
+and before any model was evaluated on CSAW-S or CDD-CESM.
+
+A. New training runs. Code, data (400 CBIS-DDSM mass crops, folds.csv), settings and evaluation exactly as for seeds 0-2: batch 16,
+   Adam 1e-4, up to 200 epochs, best checkpoint and early stopping (patience 10, from epoch 15) on the validation loss, learning rate
+   halved after four epochs without improvement of the training loss (schedule 'train') or of the validation loss (schedule 'val').
+   (1) Seeds 3 and 4 of the eight bottleneck models (g_q, g_cl, g_id, g_tr, p_q, p_cl, p_id, p_tr), folds 0-4, both schedules
+       (160 runs).
+   (2) Seeds 1-4 of the two reference models (full, unet), folds 0-4, schedule 'train' (40 runs).
+   Hardware: Google Colab, NVIDIA T4 only (the GPU type of seeds 0-2); a session that is not on a T4 does not start any run. Each run
+   is trained in its own Python process. Python, TensorFlow, CUDA and GPU of every run are stored with the run (env.json); the
+   TensorFlow version of the Colab image may differ from the one of seeds 0-2 and is reported. Runs keep their usual folders
+   (g_tr and p_tr: p2_rev4_runs_<schedule>; all other models: p2_jit_runs_<schedule>). A run that stops because of an
+   infrastructure error (disconnect, out of memory) is restarted from epoch 0; a run whose validation loss is never finite is
+   recorded as failed and reported. All 200 runs are reported; none is discarded or repeated for its result.
+
+B. Test sets (no fine-tuning; threshold 0.5; per image Dice, IoU, HD95 and an empty-prediction flag). Every saved model of seeds
+   0-4 is evaluated on every set with the same code (notebook 31); per crop and seed, Dice is averaged over the five fold models.
+   (1) CBIS-DDSM test folds (out-of-fold, as in the study).
+   (2) Frozen CBIS-DDSM cohort (400 mass ROIs of patients outside the study, revision 4).
+   (3) DMID (revision-4 crops).
+   (4) CSAW-S test set (Zenodo 10.5281/zenodo.4030660): reference = pixels outlined as cancer by at least two of the three
+       radiologists; one lesion = one 8-connected component of the consensus mask with area >= 0.5% of the image; crops with the
+       study's randomized protocol (scale 1.5-3.0 x lesion box, shift 0.8, seed from the MD5 of the lesion id, 256 x 256) and the
+       study's 1st-99.5th percentile intensity window (notebook 29). Per-radiologist masks are cropped with the same window.
+   (5) CDD-CESM (TCIA, CC BY 4.0): low-energy (DM) images only; one lesion = one hand-drawn region whose finding type in the data
+       set's own annotation table is a mass (benign and malignant); if the table gives finding types per image rather than per
+       region, the regions of images whose findings include a mass and no other region-forming finding (calcification,
+       architectural distortion, asymmetry) are used; all other regions are excluded; region shapes are rasterized as drawn
+       (polygon, ellipse, circle, rectangle); crops and window as in (4). The lesion inventory (images, lesions, patients,
+       exclusions by reason) is printed and stored before any model is evaluated.
+   For seeds 0-2, re-evaluation on (2) and (3) must reproduce the stored revision-4 values (largest absolute per-image Dice
+   difference reported); otherwise the stored values are kept and the difference is reported.
+
+C. Estimands and analysis (seeds 0-4; per-image Dice).
+   Primary: the nine model contrasts of Tables VI-VII under each schedule and the circuit - trigonometric contrast at each placement
+   under each schedule, on the CBIS-DDSM test folds. Crossed hierarchical bootstrap over patients and seeds (10,000 replicates,
+   rng(0)); Holm within the nine contrasts of each schedule and within the four circuit - trigonometric contrasts.
+   Equivalence: a contrast is called equivalent when its 95% interval lies within -0.02 to +0.02 Dice; a contrast whose interval
+   excludes 0 is called a difference; otherwise inconclusive.
+   Secondary: the same contrasts on (2)-(5) (Holm within each set and schedule; CSAW-S consensus reference primary, per-radiologist
+   references as sensitivity); model levels; full and unet as reference models; empty-prediction rates and HD95; code-replacement
+   drops of the circuit and trigonometric models.
+   Seed sensitivity: seeds 0-2 versus 3-4 (difference of the contrast between the two seed blocks with its interval), leave one
+   seed out, and the contrasts with seeds 0-2 only (the previously reported values) shown next to the five-seed values.
+   The five-seed results are the main results of this revision; the three-seed results remain reported.
+   No further seeds, models, schedules or test sets are added after this text is stored.
+All runs and all results are reported; none is discarded.
+written (UTC): 2026-11-03 16:53:57

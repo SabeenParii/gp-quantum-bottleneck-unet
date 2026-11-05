@@ -1,0 +1,23 @@
+Paper 2 - revision 4 analyses, written before any of them was run (frozen cohort selected, crops made or runs trained).
+
+A. Frozen evaluation on untouched patients. The pipeline is frozen: the 190 saved models, crop protocol, threshold 0.5 and metrics are
+   unchanged. Cohort: CBIS-DDSM mass ROIs (same eligibility as the study: every mass ROI whose full-field image is available, no filtering)
+   of patients NOT among the 208 study patients. Patients are shuffled once with Python random.Random(2026) and added whole, in that
+   order, while the total stays at or below 400 ROIs (patients that would exceed 400 are skipped); selection stops at 400 ROIs.
+   Crops: the study's randomized protocol (seed from the MD5 of the ROI identifier). Every saved model predicts every frozen crop; per
+   crop and seed, Dice is averaged over the five fold models (as for DMID). Primary estimands: the nine model contrasts of Tables VI-VII
+   under each schedule, crossed hierarchical bootstrap over patients and seeds (10,000 replicates, rng(0)), Holm within the nine
+   contrasts of each schedule. Secondary: model levels, the two no-network baselines, empty-prediction rates, HD95.
+B. Inference checks (no training). (i) Exact inference repeated three times within one session (same checkpoint, same inputs) and
+   compared with the stored values, for the 60 circuit runs and their Dense(4) partners, on the CBIS-DDSM test fold and DMID.
+   (ii) Initialization audit: for seeds 0-2 and fold 0, the global and patch-wise models (circuit, Dense(4), trigonometric, identity)
+   are built with the training seed; the weights of the layers shared by all variants are compared, and the initial block input and
+   output statistics and the gradient norms at the block are recorded on four training batches.
+C. New training runs (training and evaluation exactly as in the study):
+   C. Trigonometric control g_tr, p_tr: z = tanh(A cos((pi/2) x + phi)), A 4x4 Glorot uniform, phi uniform [0, 2 pi): 20 parameters,
+       same slot as the circuit; seeds 0-2, folds 0-4, both schedules (60 runs).
+   Primary estimands (CBIS-DDSM test folds): circuit - trigonometric at each placement under each schedule (4 contrasts, Holm over
+   the four). Secondary: trigonometric - Dense(4) and trigonometric - identity at each placement; the same contrasts on DMID
+   (exploratory) and on the frozen cohort; code-replacement drops of the trigonometric models.
+   No further seeds and no further learning-rate schedule are trained.
+All runs and all results are reported; none is discarded.

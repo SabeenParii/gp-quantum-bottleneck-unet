@@ -1,0 +1,10 @@
+Paper 2 - revision 5, protocol amendment 1 (CSAW-S lesion size rule).
+Recorded before any model was evaluated on CSAW-S or CDD-CESM and before any revision-5 run was trained.
+Reason: with the stored rule (one lesion = one 8-connected component of the consensus mask with area >= 0.5% of the image) the
+CSAW-S test set gave 4 lesions in 4 patients (26 test images; 17 smaller consensus components excluded), too few for the planned
+cluster bootstrap and Holm adjustment. Only the lesion inventory (counts and sizes) was seen; no prediction or Dice on CSAW-S exists.
+Change: the minimum component area is 0.05% of the image (smaller components are outline fragments). Lesions that also meet the
+stored 0.5% rule are flagged (meets_prespecified_0p5pct) and the contrasts are also reported for that subset. Everything else in the
+stored protocol is unchanged (consensus of at least two of three radiologists, crops, window, references, analysis).
+Output folder: data/external/csaws_mass_256_jit_a1 (the folder of the first preparation, csaws_mass_256_jit, is not used).
+written (UTC): 2026-11-03 16:40:36

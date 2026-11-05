@@ -1,0 +1,7 @@
+control,seeds,identical_all_seeds,max_abs_diff,differing_layers
+g_cl,5,True,0.0,[]
+g_id,5,False,0.7840780019760132,"['dec1_conv1', 'dec1_conv2', 'dec2_conv1', 'dec2_conv2', 'dec3_conv1', 'dec3_conv2', 'dec4_conv1', 'dec4_conv2', 'output_mask', 'post_dense']"
+g_tr,5,False,0.7689846754074097,"['dec1_conv1', 'dec1_conv2', 'dec2_conv1', 'dec2_conv2', 'dec3_conv1', 'dec3_conv2', 'dec4_conv1', 'dec4_conv2', 'output_mask', 'post_dense']"
+p_cl,5,True,0.0,[]
+p_id,5,False,0.7840780019760132,"['dec1_conv1', 'dec1_conv2', 'dec2_conv1', 'dec2_conv2', 'dec3_conv1', 'dec3_conv2', 'dec4_conv1', 'dec4_conv2', 'output_mask', 'post_conv']"
+p_tr,5,False,0.7689846754074097,"['dec1_conv1', 'dec1_conv2', 'dec2_conv1', 'dec2_conv2', 'dec3_conv1', 'dec3_conv2', 'dec4_conv1', 'dec4_conv2', 'output_mask', 'post_conv']"

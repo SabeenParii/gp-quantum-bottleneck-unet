@@ -1,13 +1,13 @@
 cff-version: 1.2.0
 message: "If you use this code or data, please cite it as below."
-title: "gp-quantum-bottleneck-unet: Source code for global versus patch-wise quantum bottlenecks in U-Net mammographic mass segmentation"
+title: "gp-quantum-bottleneck-unet: Source code and results for a five-seed comparison of a quantum bottleneck with size-matched classical and trigonometric layers in U-Net mammographic mass segmentation"
 authors:
   - family-names: Parii
     given-names: Sabeen
     affiliation: Wuhan University of Technology
     orcid: "https://orcid.org/0000-0002-2272-6115"
-version: 2.1.0
-date-released: 2026-10-29
+version: 2.2.0
+date-released: 2026-11-05
 license: MIT
 repository-code: "https://github.com/SabeenParii/gp-quantum-bottleneck-unet"
 doi: 10.5281/zenodo.23509729
@@ -16,5 +16,6 @@ keywords:
   - U-Net
   - mammography
   - medical image segmentation
-  - ablation study
+  - variational quantum circuits
+  - classical surrogates
   - external validation
