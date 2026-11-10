@@ -1,6 +1,6 @@
 # gp-quantum-bottleneck-unet
 
-Code, data tables and per-image results for the study **"What does a quantum bottleneck add to U-Net mammographic mass segmentation? A five-seed comparison with size-matched classical and trigonometric layers."** (Version v2.2.0. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
+Code, data tables and per-image results for the study **"What does a quantum bottleneck add to U-Net mammographic mass segmentation? A five-seed comparison with size-matched classical and trigonometric layers."** (Version v2.3.0. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
 
 A simulated 4-qubit, 2-layer parameterized quantum circuit is placed in the bottleneck slot of a U-Net in two ways:
 
@@ -64,12 +64,37 @@ Column codes: `set` / `schedule` = learning-rate schedule (`train`: reduce on tr
 
 Scripts: `analysis/five_seed_statistics.py` (prespecified analysis), `analysis/five_seed_code_replacement.py`, `analysis/five_seed_additional.py`, `analysis/stage2_analysis.py`. Notebooks 25–36 produce the stage-2 and five-seed runs and tables (25 frozen cohort, 26 inference checks, 27/30 training, 28/31 evaluation, 29/29b external crops, 32 initialization audit, 33 additional analyses, 34 weight-change audit, 35 statistics on Drive, 36 export of large tables). Without the CSAW-S table, `five_seed_statistics.py` skips CSAW-S, and the bootstrap draws of the following set (CDD-CESM) then differ from the released `rev5_contrasts.csv`, which was computed with all sets.
 
+## Results of the additional experiments (v2.3.0)
+
+Two further stages were added after the five-seed analysis, each written down in `protocols/` before any of its runs was trained (primary learning-rate schedule only; 410 runs):
+
+- **Stage 3** (`protocols/PROTOCOL_stage3_additional_experiments.txt`, 190 runs): **E1** faster-learning block (every weight of the 4 → 4 block stored as v = θ/100 and used as θ = 100 v, so the block learns with a 100-fold effective learning rate; circuit, Dense(4) and trigonometric blocks; seeds 0–2) and **E2** trigonometric and identity controls that start from the initial weights of the circuit model in every shared layer (seeds 0–4).
+- **Stage 4** (`protocols/PROTOCOL_stage4_additional_experiments.txt`, 220 runs): **E3** block learning-rate factor (10, 30 or 100) chosen per block on the validation loss of seed 0 (`results/additional_experiments/E3_selection.json`), then seeds 1–2 of the selected blocks; **E1+** seeds 3–4 of the six E1 models; **E4** wider angle encoding πc instead of (π/2)c for the circuit and trigonometric blocks (seeds 0–2).
+
+| File | Content |
+| --- | --- |
+| `results/additional_experiments/per_image/stage3_*_per_image.csv.gz` | The 190 stage-3 runs on their own CBIS-DDSM test fold (`cbis`: Dice, IoU, HD95, Dice after code replacement), on the frozen CBIS-DDSM cohort, DMID and CDD-CESM (every fold model) |
+| `results/additional_experiments/per_image/stage4_*_per_image.csv.gz` | The same for the 220 stage-4 runs |
+| `results/additional_experiments/E3_selection.json` | Mean best validation loss of each block at factors 10, 30 and 100 (seed 0) and the selected factor |
+| `results/additional_experiments/stage3_weight_change.csv`, `stage4_weight_change.csv` | Change of the block and its neighbouring layers from initialization to the saved weights, shared-initialization check and block scale of every run |
+| `results/additional_experiments/stage4_angle_spread.csv` | Spread of the encoded rotation angles of the circuit models (factor-100 and πc models, CBIS-DDSM crops) |
+| `results/additional_experiments/stats/stage3_contrasts.csv`, `stage4_contrasts.csv` | All prespecified contrasts (main families with Holm-adjusted p-values and descriptive contrasts) per test set and reference |
+| `results/additional_experiments/stats/stage3_levels.csv`, `stage4_levels.csv` | Model levels with 95% CI, median HD95 and empty-prediction rate per test set |
+| `results/additional_experiments/stats/stage3_extra.csv` | Additional analyses of E1, not prespecified (per seed, leaving out one seed, trigonometric learning-rate effect) |
+
+Scripts: `analysis/additional_experiments.py` (prespecified analyses of both stages; the estimator of `five_seed_statistics.py`) and `analysis/additional_experiments_extra.py` (additional analyses of E1). Model code: `src/qseg2_stage3.py`, `src/qseg2_stage4.py`; runners `src/p2_run_stage3.py`, `src/p2_run_stage4.py`; pre-flight checks of the new models `src/check_stage3.py`, `src/check_stage4b.py` (the notebooks write these files to the Drive code folder themselves). Notebooks: 37 (stage-3 training, two sessions), 38 (stage-3 evaluation), 39 (stage-4 training, two sessions), 40 (stage-4 evaluation). All stage-3 and stage-4 runs were trained on NVIDIA T4 GPUs (the training notebooks stop on any other GPU). The stage-4 runs were evaluated on an NVIDIA L4 GPU (inference only); re-scoring the CBIS-DDSM test fold of one run per model reproduced the Dice stored at training time within 0.003.
+
+`additional_experiments.py` reproduces every value of the released `stage3_contrasts.csv`, `stage4_contrasts.csv` and level tables exactly when the CSAW-S per-image scores are present. They are not part of the release; without them the CSAW-S rows are skipped and the bootstrap draws of CDD-CESM differ from the released tables. CBIS-DDSM, the frozen cohort and DMID are reproduced exactly from the released files. In `additional_experiments_extra.py` the point estimates are exact, and CI limits can differ from Online Resource Tables S29–S30 by up to 0.002 (different order of the bootstrap draws).
+
 ## Repository layout
 
 ```
 src/qseg/          shared package: conv blocks, circuit layer, state-vector simulator,
                    loss, metrics, augmentation, training loop
 src/qseg2.py       global/patch-wise bottlenecks, controls, code-replacement layer, CV runner
+src/qseg2_stage3.py, src/qseg2_stage4.py
+                   models of the additional experiments (faster-learning block, shared initialization,
+                   per-block learning rate, wider angle encoding)
 notebooks/         Colab notebooks of the reported study, in run order (see below)
 analysis/          statistics (crossed hierarchical bootstrap, Holm correction)
 protocols/         written analysis plans with their time stamps
@@ -148,6 +173,10 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 1. **Statistics, tables and figures from the released per-image results** (any computer, minutes): the commands above. The bootstrap is seeded, so every reported estimate, CI and p-value is reproduced exactly.
 2. **Inference from trained models** (notebooks 14, 20, 23, 24; T4 GPU): needs the saved checkpoints. The 190 checkpoints are not included in the release because of their size; they are retained by the author and are available on request. GPU inference is not bit-reproducible, so re-scored Dice values can differ from the released ones in the third or fourth decimal (the notebooks report this difference).
 3. **Retraining** (notebooks 11–13; 5 to 28 minutes per run, about 43 GPU hours for all 190 runs on T4 or L4 GPUs, from `run_records.csv`): reproduces the experiment but not the exact weights, because GPU training is not deterministic.
+
+## Changes in v2.3.0
+
+- Additional experiments, stages 3 and 4 (410 runs), prespecified in `protocols/PROTOCOL_stage3_additional_experiments.txt` and `protocols/PROTOCOL_stage4_additional_experiments.txt`: model code, runners and pre-flight checks (`src/`), notebooks 37–40, per-image results, block weight change, angle spread and statistics (`results/additional_experiments/`), analysis scripts (`analysis/additional_experiments*.py`).
 
 ## Changes in v2.2.0
 

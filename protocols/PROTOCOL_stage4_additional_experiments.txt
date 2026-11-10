@@ -1,0 +1,46 @@
+Stage 4 - additional experiments (block learning rate chosen per block; five seeds for the faster-learning comparison; wider
+encoding range), written before any stage-4 run was trained.
+
+Motivation. In the faster-learning experiment (stage 3, E1) one untuned factor (100) set the effective learning rate of every 4->4
+block, three seeds were used, and the codes entering the circuit covered a limited angle range (rotation-angle SD 0.56-0.68 rad).
+Three additional experiments test whether these choices change the conclusions. The five-seed and stage-3 results stay as reported;
+these experiments are reported as additional experiments, specified before their runs.
+
+A. Training runs. Code, data (400 CBIS-DDSM mass crops, folds.csv), settings and evaluation as for the stage-3 runs: batch 16, Adam
+   1e-4, up to 200 epochs, best checkpoint and early stopping (patience 10, from epoch 15) on the validation loss, learning rate halved
+   after four epochs without improvement of the training loss (primary schedule 'train' only), Google Colab NVIDIA T4, one Python
+   process per run (runner p2_run_stage4.py, models in qseg2_stage4.py). Run folders: results/p2_stage4_runs_train. Every model
+   starts from the initial weights of the standard circuit model of the same placement and seed in every shared layer, and its
+   effective initial block weights equal those of the standard block of the same kind and seed (checked before training).
+   E3 - block learning rate chosen per block. Models g_/p_ x q_/cl_/tr_ x fast10/fast30: effective block learning rate 10 or 30
+        times that of the rest of the network (reparameterization as in E1; factor 100 = the E1 models).
+        Step 1 (selection, 60 runs): the 12 models, folds 0-4, seed 0. For each of the six blocks (placement x circuit, Dense(4),
+        trigonometric) the factor among 10, 30 and 100 with the lowest mean best validation loss over the five folds at seed 0 is
+        selected (factor 100: the E1 runs of seed 0). The selection uses validation losses only.
+        Step 2 (at most 60 runs): for every block whose selected factor is 10 or 30, the same model with seeds 1 and 2, folds 0-4.
+   E1+ - five seeds for the faster-learning comparison (60 runs): the six E1 models (g_/p_ x q_fast, cl_fast, tr_fast), folds 0-4,
+        seeds 3 and 4, exactly as in E1.
+   E4 - wider encoding range (60 runs): g_q_wide, p_q_wide, g_tr_wide, p_tr_wide; folds 0-4; seeds 0-2. The angle encoding of the
+        circuit and of the trigonometric layer is pi*c instead of (pi/2)*c (codes c in (-1, 1), so angles span (-pi, pi)); block
+        learning rate factor 100 as in E1; all else as E1. Dense(4) has no angle encoding, so cl_fast (E1) is its comparator.
+   Run order: E3 step 1, E4, E1+, E3 step 2. A run that stops because of an infrastructure error is restarted from epoch 0; a run
+   whose validation loss is never finite is recorded as failed and reported. All runs are reported; none is discarded or repeated
+   for its result. No further stage-4 models, seeds, schedules, factors or encodings are added.
+
+B. Test sets and evaluation: as stage 3 (CBIS-DDSM test folds, frozen CBIS-DDSM cohort, DMID, CSAW-S with the consensus and the three
+   per-radiologist references, CDD-CESM), threshold 0.5, per-image Dice, IoU, HD95 and empty flag; on the sets other than the test
+   folds, Dice is averaged per crop and seed over the five fold models.
+
+C. Estimands and analysis (crossed hierarchical bootstrap over seeds, resampled jointly, and clusters - patients; DMID: source images -
+   B = 10,000, numpy default_rng(0); verdicts as before: equivalent when the 95% CI lies within +-0.02 Dice, difference when it
+   excludes zero, inconclusive otherwise; nominal when Holm-adjusted p >= 0.05).
+   E3, per placement and test set, seeds 0-2, each block at its selected factor: q_sel - cl_sel and q_sel - tr_sel (Holm within
+       these four contrasts of each test set). Descriptive: validation losses and test Dice of every block at every factor (seed 0).
+   E1+, per placement and test set, seeds 0-4: q_fast - cl_fast and q_fast - tr_fast (Holm within these four contrasts of each test
+       set); these five-seed values are reported with the three-seed E1 values, which are not replaced.
+   E4, per placement and test set, seeds 0-2: q_wide - cl_fast and q_wide - tr_wide (Holm within these four contrasts of each test
+       set). Descriptive: q_wide - q_fast and tr_wide - tr_fast; spread of the encoded angles; for the circuit models, the share of
+       output variance explained by an additive model of the inputs (as in the five-seed study).
+   Block weight change of every model is reported. If any primary contrast on the CBIS-DDSM test folds favors the circuit with a
+   95% CI excluding zero, this is reported in the abstract; all other outcomes are reported in the results and the Online Resource.
+written (UTC): 2026-11-08 16:35:48
