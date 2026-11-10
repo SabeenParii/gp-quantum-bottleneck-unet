@@ -10,7 +10,7 @@ version: 2.3.0
 date-released: 2026-11-10
 license: MIT
 repository-code: "https://github.com/SabeenParii/gp-quantum-bottleneck-unet"
-doi: 10.5281/zenodo.23509729
+doi: 10.5281/zenodo.24114808
 keywords:
   - hybrid quantum-classical neural networks
   - U-Net
