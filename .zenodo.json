@@ -1,8 +1,8 @@
 {
   "title": "gp-quantum-bottleneck-unet: Source code and results for a five-seed comparison of a quantum bottleneck with size-matched classical and trigonometric layers in U-Net mammographic mass segmentation",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "upload_type": "software",
-  "description": "Code, protocols, fold assignments, crop parameters and per-image results for the study of global versus patch-wise quantum bottlenecks in U-Net mass segmentation: a simulated 4-qubit circuit compared with size-matched Dense(4) and trigonometric layers and an identity mapping in the same slot, trained on CBIS-DDSM with patient-level cross-validation, five seeds and two learning-rate schedules (450 runs), and tested on a frozen CBIS-DDSM cohort, DMID, CSAW-S and CDD-CESM, with code-replacement tests, initialization and weight-change audits and analyses of the circuit function class, entanglement and noise.",
+  "description": "Code, protocols, fold assignments, crop parameters and per-image results for the study of global versus patch-wise quantum bottlenecks in U-Net mass segmentation: a simulated 4-qubit circuit compared with size-matched Dense(4) and trigonometric layers and an identity mapping in the same slot, trained on CBIS-DDSM with patient-level cross-validation, five seeds and two learning-rate schedules (450 runs) plus 410 runs of prespecified additional experiments (faster-learning block, shared initialization of the controls, per-block learning rate, wider angle encoding), and tested on a frozen CBIS-DDSM cohort, DMID, CSAW-S and CDD-CESM, with code-replacement tests, initialization and weight-change audits and analyses of the circuit function class, entanglement and noise.",
   "creators": [
     {
       "name": "Parii, Sabeen",
