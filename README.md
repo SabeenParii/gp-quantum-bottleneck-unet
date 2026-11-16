@@ -1,6 +1,6 @@
 # gp-quantum-bottleneck-unet
 
-Code, data tables and per-image results for the study **"What does a quantum bottleneck add to U-Net mammographic mass segmentation? A five-seed comparison with size-matched classical and trigonometric layers."** (Version v2.3.0. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
+Code, data tables and per-image results for the study **"What does a quantum bottleneck add to U-Net mammographic mass segmentation? A controlled comparison with size-matched classical and trigonometric layers."** (Version v2.3.1. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
 
 A simulated 4-qubit, 2-layer parameterized quantum circuit is placed in the bottleneck slot of a U-Net in two ways:
 
@@ -9,7 +9,7 @@ A simulated 4-qubit, 2-layer parameterized quantum circuit is placed in the bott
 
 At each placement the circuit (Q) is compared with a classical Dense(4, tanh) layer (Cl) and a trigonometric layer tanh(A cos(πx/2 + φ)) (Tr), both with the same number of effective weights, and with an identity mapping (Id) in the same slot. Two classical reference models are trained as well: a U-Net with an uncompressed bottleneck (`full`) and a wider classical U-Net (`unet`). The hybrid and `full` models use dropout (0.1–0.3); `unet` has no dropout.
 
-The lesion position and scale are randomized within each ROI crop. Models are trained on CBIS-DDSM mass ROIs with patient-level five-fold cross-validation, five seeds and two learning-rate schedules (450 runs) and tested without fine-tuning on a frozen CBIS-DDSM cohort of other patients and on DMID, CSAW-S and CDD-CESM. The study grew in three stages: (1) circuit, Dense(4) and identity models with seeds 0–2 (v2.0–v2.1); (2) the trigonometric control and the frozen cohort (`protocols/PROTOCOL_stage2_trigonometric_and_frozen.txt`); (3) the extension to seeds 3–4 and two further external sets, fixed in `protocols/PROTOCOL_five_seed_extension.txt` before any of its runs was trained, with one amendment recorded before any evaluation. Code-replacement tests (mean training code, another training image's code) measure how sensitive each network is to its bottleneck code; they do not show how the code is used.
+The lesion position and scale are randomized within each ROI crop. Models are trained on CBIS-DDSM mass ROIs with patient-level five-fold cross-validation, five seeds and two learning-rate schedules (450 runs) and tested without fine-tuning on a frozen CBIS-DDSM cohort of other patients and on DMID, CSAW-S and CDD-CESM. The study grew in five stages, as described in the manuscript: (1) circuit, Dense(4) and identity models with seeds 0–2 (v2.0–v2.1); (2) the trigonometric control and the frozen cohort (`protocols/PROTOCOL_stage2_trigonometric_and_frozen.txt`); (3) the extension to seeds 3–4 and two further external sets, fixed in `protocols/PROTOCOL_five_seed_extension.txt` before any of its runs was trained, with one amendment recorded before any evaluation; (4) and (5) the additional experiments with trained blocks, whose files are labelled `stage3` and `stage4` (see below). Code-replacement tests (mean training code, another training image's code) measure how sensitive each network is to its bottleneck code; they do not show how the code is used.
 
 ## Data
 
@@ -40,7 +40,7 @@ Only public, de-identified datasets are used. **No images are included in this r
 | `results/run_records.csv` | One row per run: epochs, best epoch, training time, GPU, learning-rate history summary, gradient audit of the circuit weights |
 | `results/train_val_soft_dice.csv` | Train and validation soft Dice of every run, both measured in inference mode |
 | `results/finite_shots_per_image.csv.gz` | Finite-shot evaluation of the 60 circuit runs (notebook 23): per-image Dice with exact expectation values and with 100, 1,000 and 10,000 shots (three draws each), share of flipped pixels and mean absolute probability change |
-| `results/replacement_v2_per_image.csv.gz` | Code-replacement tests under the fixed-donor protocol (notebook 24; 180 hybrid runs, 68,580 rows): Dice with the normal code recomputed in the same evaluation (`dice`), with the exact mean of the 240 training codes (`dice_const`) and with ten fixed donors (`dice_swap0`–`dice_swap9`), share of flipped pixels and mean absolute probability change. These values are used for Table VIII and Fig. 6 |
+| `results/replacement_v2_per_image.csv.gz` | Code-replacement tests under the fixed-donor protocol (notebook 24; 180 hybrid runs, 68,580 rows): Dice with the normal code recomputed in the same evaluation (`dice`), with the exact mean of the 240 training codes (`dice_const`) and with ten fixed donors (`dice_swap0`–`dice_swap9`), share of flipped pixels and mean absolute probability change. These values are used for Table 8 and Fig. 6 |
 | `results/finite_shots_joint_per_image.csv.gz` | Finite-shot evaluation with joint sampling of the four measured qubits from common bitstrings (notebook 24), same layout as `finite_shots_per_image.csv.gz` |
 | `results/stats/` | Output of the analysis scripts (contrasts, Holm-adjusted p-values, code-replacement tests, sensitivity analyses) |
 
@@ -131,7 +131,7 @@ python analysis/hierarchical_stats.py                       # main contrasts, mo
 python analysis/additional_analyses.py                      # interaction, between-setting changes, collapsed run, seeds
 python analysis/fold0_sensitivity.py                        # all contrasts without fold 0, both schedules
 python analysis/severing_tests.py                           # code-replacement tests, original donor scheme (development; Suppl. Table S5 comparison)
-python analysis/replacement_v2.py                           # code-replacement tests, fixed-donor protocol (Table VIII, Fig. 6, Suppl. Table S5)
+python analysis/replacement_v2.py                           # code-replacement tests, fixed-donor protocol (Table 8, Fig. 6, Suppl. Table S5)
 python analysis/finite_shots.py                             # finite-shot evaluation of the circuit models
 python analysis/finite_shots.py --joint                     # the same with joint bitstring sampling
 python analysis/hierarchical_stats.py --exclude-uncertain --out results/stats_excl_uncertain
@@ -151,12 +151,12 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 
 | Manuscript item | Script | Output (`results/`) |
 | --- | --- | --- |
-| Table II (cohorts) | — | `data/cbis_case_descriptors.csv`, `data/dmid_records.csv` |
+| Table 2 (cohorts) | — | `data/cbis_case_descriptors.csv`, `data/dmid_records.csv` |
 | Tables IV, V; Fig. 4 | `hierarchical_stats.py` | `stats/summary_models.csv`, `stats/external_drop.csv`, `no_network_baselines.csv`; empty rates and HD95 from `per_image_results.csv.gz` |
 | Comparisons with full and unet (Section 4.1) | `hierarchical_stats.py` | `stats/contrasts_vs_reference_seed0.csv` |
 | Tables VI, VII; Fig. 5 | `hierarchical_stats.py` | `stats/contrasts.csv` |
 | Rows "without the collapsed run" (Tables VI, VII); Suppl. Table S8 | `additional_analyses.py` | `stats/additional_analyses.csv` (`collapsed run removed (paired)`) |
-| Table VIII; Fig. 6; Suppl. Table S5 | `replacement_v2.py`; `figures/figs_results.py` | `stats/replacement_v2_tests.csv`, `stats/replacement_v2_distribution.csv`, `stats/replacement_v2_drop_contrasts.csv`, `stats/replacement_v2_vs_v1.csv` |
+| Table 8; Fig. 6; Suppl. Table S5 | `replacement_v2.py`; `figures/figs_results.py` | `stats/replacement_v2_tests.csv`, `stats/replacement_v2_distribution.csv`, `stats/replacement_v2_drop_contrasts.csv`, `stats/replacement_v2_vs_v1.csv` |
 | Section 4.6; Suppl. Table S10 (training dynamics) | — | `run_records.csv`, `train_val_soft_dice.csv` |
 | Suppl. Table S2 (DMID reference, three cohorts) | `hierarchical_stats.py` (main, `--results …original_rule…`, `--exclude-uncertain`) | `stats/`, `stats_original_rule/`, `stats_excl_uncertain/` |
 | Suppl. Table S3 (development history) | — | `preliminary/`, notebooks 11–24 |
@@ -174,11 +174,15 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 2. **Inference from trained models** (notebooks 14, 20, 23, 24; T4 GPU): needs the saved checkpoints. The 190 checkpoints are not included in the release because of their size; they are retained by the author and are available on request. GPU inference is not bit-reproducible, so re-scored Dice values can differ from the released ones in the third or fourth decimal (the notebooks report this difference).
 3. **Retraining** (notebooks 11–13; 5 to 28 minutes per run, about 43 GPU hours for all 190 runs on T4 or L4 GPUs, from `run_records.csv`): reproduces the experiment but not the exact weights, because GPU training is not deterministic.
 
+## Changes in v2.3.1
+
+- README: study title and description of the five stages aligned with the manuscript; table numbers given in the manuscript's numbering (Table 2, Table 8). No code, data or results changed.
+
 ## Changes in v2.3.0
 
 - Additional experiments, stages 3 and 4 (410 runs), prespecified in `protocols/PROTOCOL_stage3_additional_experiments.txt` and `protocols/PROTOCOL_stage4_additional_experiments.txt`: model code, runners and pre-flight checks (`src/`), notebooks 37–40, per-image results, block weight change, angle spread and statistics (`results/additional_experiments/`), analysis scripts (`analysis/additional_experiments*.py`).
 
-## Changes in v2.2.0
+## Changes in v2.2.0 (released as part of v2.3.0)
 
 - Trigonometric control (`src/qseg2_rev4.py`), frozen CBIS-DDSM cohort and inference checks (notebooks 25–28).
 - Five-seed extension and two further external test sets (CSAW-S, CDD-CESM), prespecified in `protocols/` (notebooks 29–31).
@@ -190,7 +194,7 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 
 ## Changes in v2.1.0
 
-- Code-replacement tests under a fixed-donor protocol (all 240 training codes, exact mean, fixed hash-based donors shared by all models and seeds of a fold): notebook 24, `analysis/replacement_v2.py`, `results/replacement_v2_per_image.csv.gz`. These replace the original-scheme values in Table VIII and Fig. 6; the original values are kept for comparison.
+- Code-replacement tests under a fixed-donor protocol (all 240 training codes, exact mean, fixed hash-based donors shared by all models and seeds of a fold): notebook 24, `analysis/replacement_v2.py`, `results/replacement_v2_per_image.csv.gz`. These replace the original-scheme values in Table 8 and Fig. 6; the original values are kept for comparison.
 - Finite-shot evaluation with joint bitstring sampling (`finite_shots.py --joint`, `results/finite_shots_joint_per_image.csv.gz`).
 - Prediction-example figure (notebook 24).
 - Preliminary notebook `02d_sensitivity_lr_train_seeds12` (training-loss schedule, seeds 1 and 2, of the earlier experiment), so that the full development history is archived.
