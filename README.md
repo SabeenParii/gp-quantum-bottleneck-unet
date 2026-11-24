@@ -162,6 +162,8 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 | Table 5 (trained blocks A1 to A4) | `additional_experiments.py` | `additional_experiments/stats/stage3_contrasts.csv`, `stage4_contrasts.csv` |
 | Table 5, rows Tr vs D (descriptive) | `trig_vs_dense.py` | `additional_experiments/stats/trig_vs_dense.csv` |
 | Section 4.6 (seeds, shots and noise) | `finite_shots.py`, `five_seed_additional.py` | `stats/finite_shots_*.csv`, `five_seed/additional/B_*.csv`, `C_*.csv` |
+| Section 4.7, Table 6 (computational cost): weights, epochs and training time | `compute_cost.py` | `stats/train_cost.csv` (input: `run_records.csv`) |
+| Section 4.7, Table 6: inference time on one T4 (random inputs, no data) | notebook `41_compute_cost` | `compute_cost/inference_ms.csv` |
 | Supplementary Material 3 (all result tables) | the scripts above | the files above |
 
 The experiments with trained blocks A1, A2, A3 and A4 of the manuscript are E1 (E1+ with five seeds), E2, E3 and E4 in this repository.
@@ -199,6 +201,8 @@ The experiments with trained blocks A1, A2, A3 and A4 of the manuscript are E1 (
 - README: study title of the journal manuscript; correspondence of manuscript items with scripts and result files; environment section states the training GPU (T4) and the evaluation GPU of the stage-4 runs (L4) separately.
 - `analysis/trained_circuit_function.py` with its inputs (`results/additional_experiments/trained_circuit_codes/`, codes entering the trained global circuits of A1 and A4 for all 400 CBIS-DDSM crops) and output (`trained_circuit_function.csv`): what the trained circuits compute (manuscript Table 4).
 - `analysis/trig_vs_dense.py` and `results/additional_experiments/stats/trig_vs_dense.csv`: descriptive trigonometric versus Dense(4) contrasts (manuscript Table 5).
+- `analysis/compute_cost.py` with `results/stats/train_cost.csv`, and notebook `41_compute_cost` with `results/compute_cost/inference_ms.csv`: weights, training time and inference time of each model (manuscript Section 4.7, Table 6).
+- `CITATION.cff`: DOI set to the concept DOI of the archive (10.5281/zenodo.23509729), which always resolves to the latest version.
 - No earlier code, data or result changed.
 
 ## Related manuscripts
