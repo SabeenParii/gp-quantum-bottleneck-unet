@@ -1,6 +1,6 @@
 # gp-quantum-bottleneck-unet
 
-Code, data tables and per-image results for the study **"What does a quantum bottleneck add to U-Net mammographic mass segmentation? A controlled comparison with size-matched classical and trigonometric layers."** (Version v2.3.1. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
+Code, data tables and per-image results for the study **"What does a quantum bottleneck add to U-Net mammographic mass segmentation? A controlled comparison with classical and trigonometric layers of the same size."** (Version v2.3.2. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
 
 A simulated 4-qubit, 2-layer parameterized quantum circuit is placed in the bottleneck slot of a U-Net in two ways:
 
@@ -149,6 +149,26 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 
 ### Where each result comes from
 
+**Journal manuscript.** The submitted manuscript is a shorter version of the study. Its items map to the files of this release as follows (Supplementary Material 1 has the same correspondence on its first page).
+
+| Manuscript item | Script | Output (`results/`) |
+| --- | --- | --- |
+| Table 2 (datasets) | — | `data/cbis_folds_randomized_crops.csv`, `data/dmid_records.csv` |
+| Table 3, Fig. 5 (model levels, five seeds) | `five_seed_statistics.py` | `five_seed/stats/rev5_levels.csv` |
+| Fig. 6 (block contrasts of the main runs) | `five_seed_statistics.py` | `five_seed/stats/rev5_contrasts.csv` |
+| Fig. 7 (code replacement) | `five_seed_code_replacement.py` | `five_seed/stats/rev5_cbis_drops.csv`, `rev5_dmid_drops.csv` |
+| Table 4, main runs | `five_seed_additional.py` | `five_seed/additional/A_*.csv` |
+| Table 4, after training (A1, A4) | `trained_circuit_function.py` | `additional_experiments/trained_circuit_function.csv` (input: `additional_experiments/trained_circuit_codes/`) |
+| Table 5 (trained blocks A1 to A4) | `additional_experiments.py` | `additional_experiments/stats/stage3_contrasts.csv`, `stage4_contrasts.csv` |
+| Table 5, rows Tr vs D (descriptive) | `trig_vs_dense.py` | `additional_experiments/stats/trig_vs_dense.csv` |
+| Section 4.6 (seeds, shots and noise) | `finite_shots.py`, `five_seed_additional.py` | `stats/finite_shots_*.csv`, `five_seed/additional/B_*.csv`, `C_*.csv` |
+| Supplementary Material 3 (all result tables) | the scripts above | the files above |
+
+The experiments with trained blocks A1, A2, A3 and A4 of the manuscript are E1 (E1+ with five seeds), E2, E3 and E4 in this repository.
+
+**Extended report.** The table below uses the section, table and figure numbers of the extended report of the same study, which Supplementary Materials 1 and 2 cite.
+
+
 | Manuscript item | Script | Output (`results/`) |
 | --- | --- | --- |
 | Table 2 (cohorts) | — | `data/cbis_case_descriptors.csv`, `data/dmid_records.csv` |
@@ -173,6 +193,18 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 1. **Statistics, tables and figures from the released per-image results** (any computer, minutes): the commands above. The bootstrap is seeded, so every reported estimate, CI and p-value is reproduced exactly.
 2. **Inference from trained models** (notebooks 14, 20, 23, 24; T4 GPU): needs the saved checkpoints. The 190 checkpoints are not included in the release because of their size; they are retained by the author and are available on request. GPU inference is not bit-reproducible, so re-scored Dice values can differ from the released ones in the third or fourth decimal (the notebooks report this difference).
 3. **Retraining** (notebooks 11–13; 5 to 28 minutes per run, about 43 GPU hours for all 190 runs on T4 or L4 GPUs, from `run_records.csv`): reproduces the experiment but not the exact weights, because GPU training is not deterministic.
+
+## Changes in v2.3.2
+
+- README: study title of the journal manuscript; correspondence of manuscript items with scripts and result files; environment section states the training GPU (T4) and the evaluation GPU of the stage-4 runs (L4) separately.
+- `analysis/trained_circuit_function.py` with its inputs (`results/additional_experiments/trained_circuit_codes/`, codes entering the trained global circuits of A1 and A4 for all 400 CBIS-DDSM crops) and output (`trained_circuit_function.csv`): what the trained circuits compute (manuscript Table 4).
+- `analysis/trig_vs_dense.py` and `results/additional_experiments/stats/trig_vs_dense.csv`: descriptive trigonometric versus Dense(4) contrasts (manuscript Table 5).
+- No earlier code, data or result changed.
+
+## Related manuscripts
+
+- S. Parii, A. Iqbal, R. Ashraf, F. Aadil. Does a quantum bottleneck help a U-Net segment mammograms? Controlled comparisons with parameter-matched classical layers. Under review (whole-breast segmentation; different network and data).
+- S. Parii, A. Tujammal, A. Iqbal, R. Ashraf, F. Aadil. Does a quantum bottleneck help breast ultrasound lesion segmentation? A prespecified comparison with classical layers of the same size. In preparation.
 
 ## Changes in v2.3.1
 
@@ -212,7 +244,7 @@ The bootstrap uses 10,000 replicates with a fixed random seed, so the statistics
 
 ## Environment
 
-The reported runs used TensorFlow 2.21.0 on NVIDIA T4 or L4 GPUs in Google Colab. The quantum circuit is simulated exactly as a state vector inside TensorFlow; notebook 23 adds a finite-shot readout at test time only. See `requirements.txt` for the other packages. The statistics in `results/stats/` were regenerated with Python 3.13, NumPy 2.5, pandas 3.0 and SciPy 1.18; the analysis scripts use only NumPy and pandas operations that are stable across these versions.
+All reported runs were trained with TensorFlow 2.21.0 on NVIDIA T4 GPUs in Google Colab; the stage-4 runs were evaluated on an NVIDIA L4 GPU (inference only, see above). The quantum circuit is simulated exactly as a state vector inside TensorFlow; notebook 23 adds a finite-shot readout at test time only. See `requirements.txt` for the other packages. The statistics in `results/stats/` were regenerated with Python 3.13, NumPy 2.5, pandas 3.0 and SciPy 1.18; the analysis scripts use only NumPy and pandas operations that are stable across these versions.
 
 ## License
 
