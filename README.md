@@ -1,6 +1,6 @@
 # gp-quantum-bottleneck-unet
 
-Code, data tables and per-image results for the study **"What does a quantum bottleneck add to U-Net mammographic mass segmentation? A controlled comparison with classical and trigonometric layers of the same size."** (Version v2.3.2. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
+Code, data tables and per-image results for the study **"Quantum bottleneck or angle encoding? Controlled comparisons with trigonometric layers in U-Net mammographic mass segmentation."** (Version v2.3.2. Versions up to v2.1.0 accompany the earlier three-seed analysis of the same experiment.)
 
 A simulated 4-qubit, 2-layer parameterized quantum circuit is placed in the bottleneck slot of a U-Net in two ways:
 
